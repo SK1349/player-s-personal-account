@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: player-backend
+    ports:
+      - "8084:8084"
+    environment:
+      - SERVER_PORT=8084
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://service-db:5432/CS
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=Sofa44@))cjy
+    depends_on:
+      service-db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - player-net
+
+  service-db:
+    image: postgres:18-alpine
+    container_name: player-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Sofa44@))cjy
+      POSTGRES_DB: CS
+    ports:
+      - "15432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d CS"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - player-net
+
+  pgadmin:
+    image: dpage/pgadmin4:7
+    container_name: player-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - service-db
+    restart: unless-stopped
+    networks:
+      - player-net
+
+networks:
+  player-net:
+    driver: bridge
+
+volumes:
+  db-data:
+  pgadmin-data:
