@@ -52,6 +52,12 @@ public class UserService {
         return UserResponse.of(user);
     }
 
+    public UserResponse getByEmail(String email) {
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Email: " + email));
+        return UserResponse.of(user);
+    }
+
     @Transactional
     public UserResponse updateProfile(Long userId, UpdateProfileRequest request) {
         UserEntity user = userRepository.findById(userId)
