@@ -1,4 +1,4 @@
-# ===== ЭТАП 1: Сборка =====
+# сборка
 FROM maven:3.9-eclipse-temurin-21 AS builder
 WORKDIR /app
 
@@ -12,12 +12,10 @@ COPY src ./src
 # Собираем JAR
 RUN mvn clean package -DskipTests -B
 
-# ===== ЭТАП 2: Запуск =====
+# запуск
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-# 🔥 ВАЖНО: проверьте имя JAR в target/ после сборки!
-# Обычно: artifactId-version.jar (смотрите в pom.xml)
 COPY --from=builder /app/target/*.jar /app/app.jar
 
 EXPOSE 8084
