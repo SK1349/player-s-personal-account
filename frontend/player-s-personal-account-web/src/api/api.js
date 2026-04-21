@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8084/api', // ✅ Правильно
+  baseURL: 'http://localhost:8084/api',
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -13,5 +13,14 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// 🔥 ВАЖНО: эта строка должна быть в конце!
+export const achievementsApi = {
+  getPlayerAchievements(userId) {
+    return api.get(`/users/${userId}/achievements`);
+  },
+
+  getAchievement(achievementId) {
+    return api.get(`/achievements/${achievementId}`);
+  }
+};
+
 export default api;
