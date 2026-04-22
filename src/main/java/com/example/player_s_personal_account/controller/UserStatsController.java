@@ -3,6 +3,7 @@ import com.example.player_s_personal_account.dto.request.CreateUserStatsRequest;
 import com.example.player_s_personal_account.dto.request.UpdateUserStatsRequest;
 import com.example.player_s_personal_account.dto.response.UserStatsResponse;
 import com.example.player_s_personal_account.routes.UserStatsRoutes;
+import com.example.player_s_personal_account.service.StatsCalculationService;
 import com.example.player_s_personal_account.service.UserStatsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +16,18 @@ import java.util.List;
 public class UserStatsController {
     private final UserStatsService svc;
 
+    private final StatsCalculationService statsCalculationService;
+
+    @GetMapping(UserStatsRoutes.BY_USER_ID)
+    public UserStatsResponse getStats(@PathVariable Long userId) {
+        return statsCalculationService.calculateStats(userId);
+    }
+
     @PostMapping
     public UserStatsResponse create(@RequestBody @Valid CreateUserStatsRequest r) {
         return svc.create(r);
     }
+    /*
 
     @GetMapping
     public List<UserStatsResponse> getAll() {
@@ -39,4 +48,5 @@ public class UserStatsController {
     public void delete(@PathVariable Long userId) {
         svc.delete(userId);
     }
+    */
 }

@@ -11,6 +11,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 @Service
 @RequiredArgsConstructor
@@ -58,6 +65,31 @@ public class UserService {
         return UserResponse.of(user);
     }
 
+    private static final String UPLOAD_DIR = "./uploads/avatars/";
+
+    private String saveNewAvatar(MultipartFile file) {
+        try {
+            Path dir = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(dir)) Files.createDirectories(dir);
+
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            Path destination = dir.resolve(fileName);
+
+            Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
+            return "/avatars/" + fileName;
+        } catch (IOException e) {
+            throw new RuntimeException("Avatar saving error: " + e.getMessage(), e);
+        }
+    }
+
+    private void deleteOldAvatar(String dbPath) {
+        try {
+            String fileName = dbPath.replace("/avatars/", "");
+            Path filePath = Paths.get("./uploads/avatars/" + fileName);
+            Files.deleteIfExists(filePath);
+        } catch (IOException ignored) {}
+    }
+
     @Transactional
     public UserResponse updateProfile(Long userId, UpdateProfileRequest request) {
         UserEntity user = userRepository.findById(userId)
@@ -77,7 +109,31 @@ public class UserService {
             }
             user.setEmail(request.getEmail());
         }
-        if (request.getAvatarUrl() != null) user.setAvatarUrl(request.getAvatarUrl());
+
+        if (request.getAvatarFile() != null && !request.getAvatarFile().isEmpty()) {
+            if (user.getAvatarUrl() != null) {
+                deleteOldAvatar(user.getAvatarUrl());
+            }
+            user.setAvatarUrl(saveNewAvatar(request.getAvatarFile()));
+        }
+
+        if (request.getOldPassword() != null || request.getNewPassword() != null || request.getConfirmNewPassword() != null) {
+            if (request.getOldPassword() == null || request.getNewPassword() == null || request.getConfirmNewPassword() == null) {
+                throw new IllegalArgumentException("To change the password, fill in: old password, new password and confirmation");
+            }
+            if (!passwordEncoder.matches(request.getOldPassword(), user.getPasswordHash())) {
+                throw new IllegalArgumentException("Invalid old password");
+            }
+            if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
+                throw new IllegalArgumentException("The new password and the confirmation don't match");
+            }
+            if (request.getNewPassword().length() < 6) {
+                throw new IllegalArgumentException("The new password must be at least 6 characters long");
+            }
+            user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        }
+
+
         if (request.getBirthDate() != null) user.setBirthDate(request.getBirthDate());
         if (request.getGender() != null) user.setGender(request.getGender());
         if (request.getCountry() != null) user.setCountry(request.getCountry());

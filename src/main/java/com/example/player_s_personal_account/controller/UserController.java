@@ -29,7 +29,7 @@ public class UserController {
     @PutMapping(UserRoutes.BY_ID)
     public UserResponse updateProfile(
             @PathVariable Long id,
-            @RequestBody @Valid UpdateProfileRequest request
+            @ModelAttribute @Valid UpdateProfileRequest request
     ) {
         return userService.updateProfile(id, request);
     }

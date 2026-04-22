@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
@@ -21,12 +22,11 @@ public class UpdateProfileRequest {
     @Email(message = "Invalid email format")
     private String email;
 
-    @Size(max = 500, message = "Avatar URL must not exceed 500 characters")
-    private String avatarUrl;
+    private MultipartFile avatarFile;
 
     private LocalDate birthDate;
 
-    @Pattern(regexp = "^[MF]$", message = "Gender must be M, F, or U")
+    @Pattern(regexp = "^[MF]$", message = "Gender must be M or F")
     private String gender;
 
     @Size(max = 100, message = "Country must not exceed 100 characters")
@@ -40,4 +40,9 @@ public class UpdateProfileRequest {
 
     @Size(max = 500, message = "Bio must not exceed 500 characters")
     private String bio;
+
+    @Size(min = 6)
+    private String newPassword;
+    private String oldPassword;
+    private String confirmNewPassword;
 }
