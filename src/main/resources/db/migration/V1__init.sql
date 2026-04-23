@@ -11,68 +11,37 @@ DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS achievements CASCADE;
 DROP TABLE IF EXISTS matches CASCADE;
 
-DROP SEQUENCE IF EXISTS achievements_seq;
-DROP SEQUENCE IF EXISTS match_players_seq;
-DROP SEQUENCE IF EXISTS matches_seq;
-DROP SEQUENCE IF EXISTS user_achievements_seq;
-DROP SEQUENCE IF EXISTS users_seq;
-
-CREATE SEQUENCE achievements_seq START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE match_players_seq START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE matches_seq START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE user_achievements_seq START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE users_seq START WITH 1 INCREMENT BY 1;
+CREATE TABLE users (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nickname VARCHAR(50) NOT NULL UNIQUE,
+    full_name VARCHAR(100),
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    avatar_url VARCHAR(500),
+    birth_date DATE,
+    gender VARCHAR(1) NOT NULL,
+    country VARCHAR(100),
+    city VARCHAR(100),
+    phone VARCHAR(20),
+    bio TEXT,
+    rating INTEGER NOT NULL DEFAULT 1000,
+    level INTEGER NOT NULL DEFAULT 1,
+    created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
 CREATE TABLE achievements (
-    id BIGINT NOT NULL PRIMARY KEY DEFAULT nextval('achievements_seq'),
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     code VARCHAR(50) NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
-    icon_url VARCHAR(500),
-    description TEXT
+    description TEXT,
+    icon_url VARCHAR(500)
 );
 
 CREATE TABLE matches (
-    id BIGINT NOT NULL PRIMARY KEY DEFAULT nextval('matches_seq'),
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     played_at TIMESTAMP(6) NOT NULL,
     map_or_mode VARCHAR(50) NOT NULL,
     notes TEXT
-);
-
-CREATE TABLE users (
-    id BIGINT NOT NULL PRIMARY KEY DEFAULT nextval('users_seq'),
-    birth_date DATE,
-    gender VARCHAR(1) NOT NULL,
-    level INTEGER NOT NULL DEFAULT 1,
-    rating INTEGER NOT NULL DEFAULT 0,
-    created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    phone VARCHAR(20),
-    nickname VARCHAR(50) NOT NULL UNIQUE,
-    city VARCHAR(100),
-    country VARCHAR(100),
-    full_name VARCHAR(100),
-    avatar_url VARCHAR(500),
-    bio TEXT,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL
-);
-
-CREATE TABLE match_players (
-    id BIGINT NOT NULL PRIMARY KEY DEFAULT nextval('match_players_seq'),
-    assists INTEGER NOT NULL DEFAULT 0,
-    deaths INTEGER NOT NULL DEFAULT 0,
-    kills INTEGER NOT NULL DEFAULT 0,
-    match_id BIGINT NOT NULL,
-    user_id BIGINT NOT NULL,
-    match_result VARCHAR(10) NOT NULL,
-    UNIQUE (match_id, user_id)
-);
-
-CREATE TABLE user_achievements (
-    id BIGINT NOT NULL PRIMARY KEY DEFAULT nextval('user_achievements_seq'),
-    achievement_id BIGINT NOT NULL,
-    unlocked_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id BIGINT NOT NULL,
-    UNIQUE (user_id, achievement_id)
 );
 
 CREATE TABLE user_stats (
@@ -83,6 +52,25 @@ CREATE TABLE user_stats (
     total_deaths INTEGER NOT NULL DEFAULT 0,
     total_kills INTEGER NOT NULL DEFAULT 0,
     wins INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE match_players (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    assists INTEGER NOT NULL DEFAULT 0,
+    deaths INTEGER NOT NULL DEFAULT 0,
+    kills INTEGER NOT NULL DEFAULT 0,
+    match_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    match_result VARCHAR(10) NOT NULL,
+    UNIQUE (match_id, user_id)
+);
+
+CREATE TABLE user_achievements (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    achievement_id BIGINT NOT NULL,
+    unlocked_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id BIGINT NOT NULL,
+    UNIQUE (user_id, achievement_id)
 );
 
 ALTER TABLE match_players

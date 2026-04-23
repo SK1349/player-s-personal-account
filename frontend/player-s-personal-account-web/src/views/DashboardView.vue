@@ -2,7 +2,13 @@
   <div class="dashboard">
     <aside class="sidebar">
       <div class="user-mini">
-        <img :src="user.avatarUrl || 'https://via.placeholder.com/80'" class="avatar-small" />
+        <img
+          :src="getFullImageUrl(user.avatarUrl)"
+          :key="user.avatarUrl"
+          :alt="user.nickname"
+          class="avatar-small"
+          @error="handleImageError"
+        />
         <div>
           <div class="nickname">{{ user.nickname || 'Игрок' }}</div>
           <div class="level">Ур. {{ user.level || 1 }}</div>
@@ -16,11 +22,12 @@
           :class="{ active: activeTab === tab.id }"
           @click="handleTabChange(tab.id)"
         >
-          {{ tab.icon }} {{ tab.name }}
+          <img :src="tab.icon" :alt="tab.name" class="tab-icon" />
+          <span class="tab-name">{{ tab.name }}</span>
         </button>
       </nav>
 
-      <button class="logout-btn" @click="handleLogout">🚪 Выйти</button>
+      <button class="logout-btn" @click="handleLogout">Выйти</button>
     </aside>
 
     <main class="content">
@@ -33,30 +40,17 @@
       </div>
 
       <div v-else-if="activeTab === 'achievements'" class="tab-panel">
-        <div v-if="achievementsLoading" class="loading-state">
-          <span class="loader">⏳</span> Загрузка достижений...
-        </div>
-
-        <div v-else-if="achievementsError" class="error-state">
-          <span class="error-icon">⚠️</span>
-          <p>{{ achievementsError }}</p>
-          <button @click="fetchAchievements" class="retry-btn">Попробовать снова</button>
-        </div>
-
         <AchievementsList
-          v-else
           :achievements="achievements"
           :key="achievements.length"
           :show-code="false"
         />
       </div>
 
-      <!-- история матчей -->
       <div v-else-if="activeTab === 'matches'" class="tab-panel">
         <MatchHistory :matches="matches" />
       </div>
 
-      <!-- настройки -->
       <div v-else-if="activeTab === 'settings'" class="tab-panel">
         <ProfileSettings :user="user" @saved="onProfileSaved" />
       </div>
@@ -66,7 +60,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
 import { achievementsApi } from '../api/achievements'
 import api from '../api/api'
@@ -76,32 +70,51 @@ import AchievementsList from '../components/AchievementsList.vue'
 import MatchHistory from '../components/MatchHistory.vue'
 import ProfileSettings from '../components/ProfileSettings.vue'
 
+import profileIcon from '../assets/profile.png'
+import statsIcon from '../assets/statistics.png'
+import achievementIcon from '../assets/achievement.png'
+import matchesIcon from '../assets/battlefield.png'
+import settingsIcon from '../assets/settings.png'
+import userIcon from '../assets/user.png'
+
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 
+const API_BASE = 'http://localhost:8084'
+
 const tabs = [
-  { id: 'profile', name: 'Профиль', icon: '👤' },
-  { id: 'stats', name: 'Статистика', icon: '📊' },
-  { id: 'achievements', name: 'Достижения', icon: '🏆' },
-  { id: 'matches', name: 'Матчи', icon: '⚔️' },
-  { id: 'settings', name: 'Настройки', icon: '⚙️' },
+  { id: 'profile', name: 'Профиль', icon: profileIcon },
+  { id: 'stats', name: 'Статистика', icon: statsIcon },
+  { id: 'achievements', name: 'Достижения', icon: achievementIcon },
+  { id: 'matches', name: 'Матчи', icon: matchesIcon },
+  { id: 'settings', name: 'Настройки', icon: settingsIcon },
 ]
 
-const activeTab = ref('profile')
+const activeTab = ref(route.query.tab || 'profile')
 const user = ref({})
-
 const stats = ref(null)
 const achievements = ref([])
 const matches = ref([])
-
-const achievementsLoading = ref(false)
-const achievementsError = ref(null)
 
 const mockMatches = [
   { id: 1, opponent: 'Team Alpha', result: 'win', score: '16:12', date: '2026-04-18', map: 'Dust2' },
   { id: 2, opponent: 'ProGaming', result: 'loss', score: '14:16', date: '2026-04-17', map: 'Mirage' },
   { id: 3, opponent: 'Noobs United', result: 'win', score: '16:5', date: '2026-04-15', map: 'Inferno' }
 ]
+
+const getFullImageUrl = (url) => {
+  if (!url) return userIcon
+  if (url.startsWith('http')) return url
+  return `${API_BASE}${url}`
+}
+
+const handleImageError = (e) => {
+  if (e.target.src.includes('user') || e.target.src.includes('data:')) {
+    return
+  }
+  e.target.src = userIcon
+}
 
 onMounted(async () => {
   if (authStore.userId) {
@@ -135,14 +148,12 @@ const loadTabData = async (tabId) => {
 
 const handleTabChange = (tabId) => {
   activeTab.value = tabId
+  router.replace({ query: { tab: tabId } })
   loadTabData(tabId)
 }
 
 const fetchAchievements = async () => {
   if (!authStore.userId) return
-
-  achievementsLoading.value = true
-  achievementsError.value = null
 
   try {
     const [playerRes, catalogRes] = await Promise.all([
@@ -165,10 +176,7 @@ const fetchAchievements = async () => {
 
   } catch (e) {
     console.error('Ошибка загрузки достижений:', e)
-    achievementsError.value = e.response?.data?.error || 'Не удалось загрузить достижения'
     achievements.value = []
-  } finally {
-    achievementsLoading.value = false
   }
 }
 
@@ -179,6 +187,8 @@ const handleLogout = () => {
 
 const onProfileSaved = (updatedUser) => {
   user.value = { ...user.value, ...updatedUser }
+  authStore.user = updatedUser
+  localStorage.setItem('user', JSON.stringify(updatedUser))
 }
 
 watch(
@@ -200,7 +210,7 @@ watch(
 }
 
 .sidebar {
-  width: 220px;
+  width: 240px;
   background: #16213e;
   padding: 20px;
   display: flex;
@@ -214,7 +224,7 @@ watch(
   gap: 12px;
   padding-bottom: 20px;
   border-bottom: 1px solid #0f3460;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .avatar-small {
@@ -228,6 +238,10 @@ watch(
 .nickname {
   font-weight: 600;
   font-size: 1.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
 }
 
 .level {
@@ -252,6 +266,9 @@ watch(
   border-radius: 8px;
   transition: all 0.2s;
   font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .tabs button:hover {
@@ -262,6 +279,17 @@ watch(
 .tabs button.active {
   background: #e94560;
   color: #fff;
+}
+
+.tab-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.tab-name {
+  white-space: nowrap;
 }
 
 .logout-btn {

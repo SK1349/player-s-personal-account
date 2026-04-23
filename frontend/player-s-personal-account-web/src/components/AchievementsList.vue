@@ -1,7 +1,7 @@
 <template>
   <div class="achievements-container">
     <div v-if="achievements.length === 0" class="empty-state">
-      <p>🎮 У этого игрока пока нет достижений</p>
+      <p>У этого игрока пока нет достижений</p>
     </div>
 
     <div v-else class="achievements-grid">
@@ -43,7 +43,6 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
 
 const props = defineProps({
   achievements: {
@@ -181,7 +180,6 @@ const formatDate = (dateString) => {
   margin-top: 4px;
 }
 
-/* Адаптив для мобильных */
 @media (max-width: 600px) {
   .achievements-grid {
     grid-template-columns: 1fr;

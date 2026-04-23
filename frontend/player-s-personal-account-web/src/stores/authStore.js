@@ -15,51 +15,66 @@ export const useAuthStore = defineStore('auth', {
   },
 
 
-  actions: {
-    async register(formData) {
-      this.loading = true
-      this.error = null
-      try {
-        const response = await api.post('/users', formData)
+    actions: {
+        async register(formData) {
+            this.loading = true
+            this.error = null
 
-        this.user = response.data
-        localStorage.setItem('user', JSON.stringify(response.data))
-        return true
-      } catch (e) {
-        this.error = e.response?.data?.message || 'Ошибка регистрации'
-        return false
-      } finally {
-          this.loading = false
-      }
-    },
+            try {
+                const payload = {
+                    nickname: formData.nickname,
+                    email: formData.email,
+                    password: formData.password,
+                    gender: formData.gender || null
+                }
 
-    async login(email, password) {
-      this.loading = true
-      this.error = null
-      try {
-        const response = await api.post('/auth/login', { email, password })
+                const response = await api.post('/auth/register', payload)
+                const { token, userId, ...userData } = response.data
 
-                const token = response.data.token
-                const user = {
+                localStorage.setItem('token', token)
+                localStorage.setItem('userId', userId)
+                localStorage.setItem('user', JSON.stringify(userData))
+
+                this.token = token
+                this.userId = userId
+                this.user = userData
+
+                return true
+            } catch (e) {
+                this.error = e.response?.data?.message || e.response?.data?.error || 'Ошибка при регистрации'
+                return false
+            } finally {
+                this.loading = false
+            }
+        },
+
+      async login(email, password) {
+          this.loading = true
+          this.error = null
+          try {
+              const response = await api.post('/auth/login', { email, password })
+              const token = response.data.token
+              const user = {
                   id: response.data.userId,
                   nickname: response.data.nickname,
                   email: response.data.email
-                }
+              }
 
-        if (token) {
-          this.token = token
-          localStorage.setItem('token', token)
-        }
-        this.user = user
-        localStorage.setItem('user', JSON.stringify(user))
-        return true
-      } catch (e) {
-        this.error = e.response?.data?.message || 'Неверный логин или пароль'
-        return false
-      } finally {
-        this.loading = false
-      }
-    },
+              if (token) {
+                  this.token = token
+                  localStorage.setItem('token', token)
+              }
+              this.user = user
+              localStorage.setItem('user', JSON.stringify(user))
+              return true
+          }
+          catch (e) {
+              this.error = e.response?.data?.message || 'Неверный логин или пароль'
+              return false
+          } finally {
+              this.loading = false
+          }
+      },
 
 
 
