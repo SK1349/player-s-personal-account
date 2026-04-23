@@ -1,7 +1,13 @@
 <template>
   <div class="profile-card">
     <div class="header">
-      <img :src="user.avatarUrl || 'https://via.placeholder.com/120'" class="avatar" />
+      <img
+        :src="getFullAvatarUrl(user.avatarUrl)"
+        :key="user.avatarUrl"
+        :alt="user.nickname"
+        class="avatar"
+        @error="handleImageError"
+      />
       <div class="info">
         <h2>{{ user.nickname }}</h2>
         <p class="email">{{ user.email }}</p>
@@ -22,9 +28,26 @@
 </template>
 
 <script setup>
+import userIcon from '../assets/user.png'
+
+const API_BASE = 'http://localhost:8084'
+
 defineProps({
   user: { type: Object, default: () => ({}) }
 })
+
+const getFullAvatarUrl = (avatarUrl) => {
+  if (!avatarUrl) return userIcon
+  if (avatarUrl.startsWith('http')) return avatarUrl
+  return `${API_BASE}${avatarUrl}`
+}
+
+const handleImageError = (e) => {
+  if (e.target.src.includes('user')) {
+    return
+  }
+  e.target.src = userIcon
+}
 </script>
 
 <style scoped>
@@ -34,7 +57,6 @@ defineProps({
     padding: 24px;
     max-width: 600px;
 }
-
 .header {
     display: flex;
     gap: 20px;
@@ -42,42 +64,33 @@ defineProps({
     padding-bottom: 20px;
     border-bottom: 1px solid #0f3460;
 }
-
 .avatar {
     width: 120px;
     height: 120px;
-    border-radius: 50%;
     object-fit: cover;
-    border: 3px solid #e94560;
 }
-
 .info h2 {
     margin: 0 0 8px 0;
     font-size: 1.5rem;
 }
-
 .email {
     color: #888;
     margin: 0 0 12px 0;
 }
-
 .stats-row {
     display: flex;
     gap: 12px;
 }
-
 .badge {
     background: #0f3460;
     padding: 6px 12px;
     border-radius: 20px;
     font-size: 0.9rem;
 }
-
 .details {
     padding-top: 20px;
     color: #ccc;
 }
-
 .details p {
     margin: 8px 0;
 }
