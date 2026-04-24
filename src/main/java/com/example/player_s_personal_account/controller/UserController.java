@@ -2,12 +2,14 @@ package com.example.player_s_personal_account.controller;
 
 import com.example.player_s_personal_account.dto.request.RegisterRequest;
 import com.example.player_s_personal_account.dto.request.UpdateProfileRequest;
+import com.example.player_s_personal_account.dto.response.MatchHistoryResponse;
 import com.example.player_s_personal_account.dto.response.UserResponse;
 import com.example.player_s_personal_account.routes.UserRoutes;
 import com.example.player_s_personal_account.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping(UserRoutes.BASE)
@@ -32,5 +34,10 @@ public class UserController {
             @ModelAttribute @Valid UpdateProfileRequest request
     ) {
         return userService.updateProfile(id, request);
+    }
+
+    @GetMapping(UserRoutes.BY_ID + "/history")
+    public List<MatchHistoryResponse> getMatchHistory(@PathVariable Long id) {
+        return userService.getMatchHistory(id);
     }
 }
