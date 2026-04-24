@@ -1,41 +1,41 @@
 <template>
   <div class="achievements-container">
-    <div v-if="achievements.length === 0" class="empty-state">
-      <p>У этого игрока пока нет достижений</p>
+    <div class="section">
+      <div v-if="unlocked.length" class="achievements-grid">
+        <div v-for="ach in unlocked" :key="ach.id" class="achievement-card unlocked">
+          <div class="icon-wrapper">
+            <img v-if="ach.iconUrl" :src="ach.iconUrl" :alt="ach.name" class="achievement-icon" />
+          </div>
+          <div class="content">
+            <h4 class="title">{{ ach.name }}</h4>
+            <p class="description">{{ ach.description }}</p>
+            <div class="status">
+              <span class="unlocked-badge">Получено {{ formatDate(ach.unlockedAt) }}</span>
+            </div>
+            <span v-if="showCode" class="code">{{ ach.code }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div v-else class="empty-state">
+        <p>Полученных достижений пока нет</p>
+      </div>
     </div>
 
-    <div v-else class="achievements-grid">
-      <div
-        v-for="ach in achievements"
-        :key="ach.id"
-        class="achievement-card"
-        :class="{ unlocked: ach.unlockedAt, locked: !ach.unlockedAt }"
-      >
-        <div class="icon-wrapper">
-          <img
-            v-if="ach.iconUrl"
-            :src="ach.iconUrl"
-            :alt="ach.name"
-            class="achievement-icon"
-            :class="{ grayscale: !ach.unlockedAt }"
-          />
-          <span v-else class="icon-placeholder">
-            {{ ach.unlockedAt ? '🏆' : '🔒' }}
-          </span>
-        </div>
-
-        <div class="content">
-          <h4 class="title">{{ ach.name }}</h4>
-          <p class="description">{{ ach.description }}</p>
-
-          <div class="status">
-            <span v-if="ach.unlockedAt" class="unlocked-badge">
-              ✅ Получено {{ formatDate(ach.unlockedAt) }}
-            </span>
-            <span v-else class="locked-badge">🔓 Ещё не получено</span>
+    <div v-if="locked.length" class="section">
+      <div class="achievements-grid">
+        <div v-for="ach in locked" :key="ach.id" class="achievement-card locked">
+          <div class="icon-wrapper">
+            <img v-if="ach.iconUrl" :src="ach.iconUrl" :alt="ach.name" class="achievement-icon grayscale" />
           </div>
-
-          <span v-if="showCode" class="code">{{ ach.code }}</span>
+          <div class="content">
+            <h4 class="title">{{ ach.name }}</h4>
+            <p class="description">{{ ach.description }}</p>
+            <div class="status">
+              <span class="locked-badge">Ещё не получено</span>
+            </div>
+            <span v-if="showCode" class="code">{{ ach.code }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -43,6 +43,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 
 const props = defineProps({
   achievements: {
@@ -55,9 +56,15 @@ const props = defineProps({
   }
 })
 
+const unlocked = computed(() => props.achievements.filter(a => a.unlockedAt))
+const locked = computed(() => props.achievements.filter(a => !a.unlockedAt))
+
 const formatDate = (dateString) => {
   if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('ru-RU', {
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) return ''
+
+  return date.toLocaleDateString('ru-RU', {
     day: '2-digit',
     month: 'short',
     year: 'numeric'
@@ -76,6 +83,39 @@ const formatDate = (dateString) => {
   color: #888;
   background: #16213e;
   border-radius: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.section {
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 16px 0;
+  padding-left: 12px;
+  border-left: 4px solid #4caf50;
+}
+
+.section-title.locked {
+  color: #888;
+  border-left-color: #555;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #3a507a, transparent);
+}
+
+.divider-text {
+  padding: 0 16px;
+  white-space: nowrap;
 }
 
 .achievements-grid {
@@ -100,8 +140,9 @@ const formatDate = (dateString) => {
 }
 
 .achievement-card.locked {
-  opacity: 0.85;
+  opacity: 0.75;
   border-color: #3a507a;
+  background: #131c2e;
 }
 
 .achievement-card:hover {
@@ -178,18 +219,5 @@ const formatDate = (dateString) => {
   font-size: 0.75rem;
   color: #555;
   margin-top: 4px;
-}
-
-@media (max-width: 600px) {
-  .achievements-grid {
-    grid-template-columns: 1fr;
-  }
-  .achievement-card {
-    flex-direction: column;
-    text-align: center;
-  }
-  .icon-wrapper {
-    margin: 0 auto;
-  }
 }
 </style>

@@ -12,14 +12,15 @@ const router = createRouter({
       path: '/profile',
       name: 'profile',
       component: DashboardView,
-      meta: { requiresAuth: true } // 🔒 Защита страницы
+      meta: { requiresAuth: true }
     },
     { path: '/', redirect: '/login' }
   ],
 })
 
 router.beforeEach((to, from, next) => {
-  const isAuth = localStorage.getItem('token') || localStorage.getItem('userId')
+  const token = localStorage.getItem('token')
+  const isAuth = !!token?.trim()
 
   if (to.meta.requiresAuth && !isAuth) {
     next('/login')

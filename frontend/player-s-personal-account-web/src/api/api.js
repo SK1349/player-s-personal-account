@@ -5,8 +5,13 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+const cleanToken = (token) => {
+  return token?.replace(/^["']|["']$/g, '')?.replace(/\s+/g, '')?.trim() || null;
+};
+
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const rawToken = localStorage.getItem('token');
+  const token = cleanToken(rawToken);
 
   const isPublicPath = config.url && config.url.includes('/auth/');
 
@@ -23,6 +28,9 @@ export const achievementsApi = {
 
   getAchievement(achievementId) {
     return api.get(`/achievements/${achievementId}`);
+  },
+  getAllAchievements() {
+    return api.get('/achievements');
   }
 };
 
