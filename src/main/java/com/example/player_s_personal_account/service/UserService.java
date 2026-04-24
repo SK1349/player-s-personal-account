@@ -2,11 +2,15 @@ package com.example.player_s_personal_account.service;
 
 import com.example.player_s_personal_account.dto.request.RegisterRequest;
 import com.example.player_s_personal_account.dto.request.UpdateProfileRequest;
+import com.example.player_s_personal_account.dto.response.MatchHistoryResponse;
 import com.example.player_s_personal_account.dto.response.UserResponse;
+import com.example.player_s_personal_account.entity.MatchPlayerEntity;
 import com.example.player_s_personal_account.entity.UserEntity;
 import com.example.player_s_personal_account.exception.UserAlreadyExistsException;
 import com.example.player_s_personal_account.exception.UserNotFoundException;
+import com.example.player_s_personal_account.repository.MatchPlayerRepository;
 import com.example.player_s_personal_account.repository.UserRepository;
+import com.example.player_s_personal_account.repository.UserStatsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +22,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +31,9 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MatchPlayerRepository matchPlayerRepo;
+    private final StatsCalculationService statsCalculationService;
+    private final UserStatsRepository statsRepo;
 
     @Transactional
     public UserResponse register(RegisterRequest request) {
@@ -56,6 +65,13 @@ public class UserService {
     public UserResponse getById(Long id) {
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
+
+        if (matchPlayerRepo.existsByUserId(id) && !statsRepo.existsByUserId(id)) {
+            statsCalculationService.calculateStats(id);
+
+            user = userRepository.findById(id)
+                    .orElseThrow(() -> new UserNotFoundException(id));
+        }
         return UserResponse.of(user);
     }
 
@@ -142,5 +158,29 @@ public class UserService {
         if (request.getBio() != null) user.setBio(request.getBio());
 
         return UserResponse.of(userRepository.save(user));
+    }
+
+    @Transactional(readOnly = true)
+    public List<MatchHistoryResponse> getMatchHistory(Long userId) {
+        List<MatchPlayerEntity> myMatches = matchPlayerRepo
+                .findByUserIdOrderByMatchPlayedAtDesc(userId);
+
+        return myMatches.stream()
+                .map(mp -> {
+                    MatchPlayerEntity opponentEntry = matchPlayerRepo
+                            .findByMatchIdAndUserIdNot(mp.getMatch().getId(), userId)
+                            .orElse(null);
+
+                    String opponentNickname = "Unknown";
+                    Integer opponentRating = 1000;
+
+                    if (opponentEntry != null && opponentEntry.getUser() != null) {
+                        opponentNickname = opponentEntry.getUser().getNickname();
+                        opponentRating = opponentEntry.getUser().getRating();
+                    }
+
+                    return MatchHistoryResponse.of(mp, opponentNickname, opponentRating);
+                })
+                .collect(Collectors.toList());
     }
 }

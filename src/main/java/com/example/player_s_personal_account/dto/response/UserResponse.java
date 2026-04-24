@@ -1,5 +1,4 @@
 package com.example.player_s_personal_account.dto.response;
-
 import com.example.player_s_personal_account.entity.UserEntity;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +14,6 @@ public class UserResponse {
     private String nickname;
     private String fullName;
     private String email;
-    private String passwordHash;
     private String avatarUrl;
     private LocalDate birthDate;
     private String gender;
@@ -41,6 +39,7 @@ public class UserResponse {
                 .phone(user.getPhone())
                 .rating(user.getRating())
                 .level(user.getLevel())
+                .bio(user.getBio())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

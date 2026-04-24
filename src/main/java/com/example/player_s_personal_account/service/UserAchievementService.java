@@ -24,6 +24,7 @@ public class UserAchievementService {
     private final UserAchievementRepository achievementRelationRepo;
     private final UserRepository userRepository;
     private final AchievementRepository achievementRepository;
+    private final StatsCalculationService statsCalculationService;
 
     @Transactional
     public UserAchievementResponse grantAchievement(Long userId, String code) {
@@ -46,11 +47,13 @@ public class UserAchievementService {
         return UserAchievementResponse.of(saved);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<UserAchievementResponse> getUserAchievements(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException(userId);
         }
+
+        statsCalculationService.calculateStats(userId);
 
         return achievementRelationRepo.findByUserId(userId).stream()
                 .map(UserAchievementResponse::of)

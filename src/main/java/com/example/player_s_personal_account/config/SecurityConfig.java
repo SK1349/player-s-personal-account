@@ -35,10 +35,11 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/avatars/**").permitAll()
                         .requestMatchers("/achievements/**").permitAll()
                         .requestMatchers("/static/**", "/public/**", "/resources/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/achievements").permitAll()
-                        .requestMatchers("/api/auth/**", "/api/users").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/users/**", "/api/user-stats/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

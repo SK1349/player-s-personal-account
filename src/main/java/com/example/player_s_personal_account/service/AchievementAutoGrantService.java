@@ -21,33 +21,35 @@ public class AchievementAutoGrantService {
     private final AchievementRepository aRepo;
     private final UserRepository userRepo;
 
-
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void checkAndGrant(Long userId, UserStatsResponse stats) {
-        if (stats.getTotalKills() >= 1) {
-            grantIfNotExists(userId, "FIRST_BLOOD");
-        }
 
-        if (stats.getWins() >= 10) {
-            grantIfNotExists(userId, "VETERAN");
-        }
-
-        if (stats.getTotalKills() >= 100) {
-            grantIfNotExists(userId, "FRAG_MASTER");
+        if (stats.getWins() >= 1) {
+            grantIfNotExists(userId, "FIRST_WIN");
         }
 
         if (stats.getMatchesPlayed() >= 50) {
-            grantIfNotExists(userId, "SEASONED");
+            grantIfNotExists(userId, "VETERAN");
+        }
+
+        if (stats.getWins() >= 10 && stats.getLosses() == 0) {
+            grantIfNotExists(userId, "UNDEFEATED");
+        }
+
+        UserEntity user = userRepo.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+        if (user.getRating() >= 2000) {
+            grantIfNotExists(userId, "LEGEND");
         }
     }
 
-    private void grantIfNotExists(Long userId, String code) {
-        if (uaRepo.existsByUserIdAndAchievementCode(userId, code)) {
+    private void grantIfNotExists(Long userId, String achievementCode) {
+        if (uaRepo.existsByUserIdAndAchievementCode(userId, achievementCode)) {
             return;
         }
 
-        AchievementEntity achievement = aRepo.findByCode(code)
-                .orElseThrow(() -> new AchievementNotFoundException(code));
+        AchievementEntity achievement = aRepo.findByCode(achievementCode)
+                .orElseThrow(() -> new AchievementNotFoundException(achievementCode));
 
         UserEntity user = userRepo.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
