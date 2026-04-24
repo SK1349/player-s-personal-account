@@ -1,5 +1,9 @@
 <template>
   <div class="matches-list">
+    <div v-if="matches.length === 0" class="empty-state">
+      <p>Матчей пока нет</p>
+    </div>
+
     <div
       v-for="match in matches"
       :key="match.id"
@@ -10,21 +14,37 @@
         <span class="opponent">vs {{ match.opponent }}</span>
         <span class="map">{{ match.map }}</span>
       </div>
-      <div class="match-result">
-        <span class="score">{{ match.score }}</span>
-        <span class="result-badge">{{ match.result === 'win' ? '✓ Победа' : '✗ Поражение' }}</span>
+
+      <div class="match-score">
+        <span class="score-value">{{ match.score }}</span>
       </div>
-      <div class="match-date">
-        {{ new Date(match.date).toLocaleDateString('ru-RU') }}
+
+      <div class="match-meta">
+        <span class="result-badge">
+          {{ getResultText(match.result) }}
+        </span>
+        <span class="match-date">{{ match.date }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-defineProps({
-  matches: { type: Array, default: () => [] }
+const props = defineProps({
+  matches: {
+    type: Array,
+    default: () => []
+  }
 })
+
+const getResultText = (result) => {
+  const texts = {
+    'win': 'Победа',
+    'loss': 'Поражение',
+    'draw': 'Ничья'
+  }
+  return texts[result] || 'Поражение'
+}
 </script>
 
 <style scoped>
@@ -34,14 +54,29 @@ defineProps({
     gap: 12px;
 }
 
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+    background: #16213e;
+    border-radius: 10px;
+}
+
 .match-item {
     background: #16213e;
     border-radius: 10px;
     padding: 16px 20px;
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
+    gap: 20px;
     border-left: 4px solid transparent;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.match-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .match-item.win {
@@ -50,6 +85,10 @@ defineProps({
 
 .match-item.loss {
     border-left-color: #f44336;
+}
+
+.match-item.draw {
+    border-left-color: #ff9800;
 }
 
 .match-info {
@@ -61,23 +100,31 @@ defineProps({
 .opponent {
     font-weight: 600;
     font-size: 1.1rem;
+    color: #fff;
 }
 
 .map {
     color: #888;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    font-family: 'Courier New', monospace;
 }
 
-.match-result {
+.match-score {
+    text-align: center;
+}
+
+.score-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff;
+    font-family: 'Courier New', monospace;
+}
+
+.match-meta {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 4px;
-}
-
-.score {
-    font-size: 1.3rem;
-    font-weight: bold;
+    gap: 6px;
 }
 
 .result-badge {
@@ -85,6 +132,7 @@ defineProps({
     border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 500;
+    white-space: nowrap;
 }
 
 .win .result-badge {
@@ -97,8 +145,13 @@ defineProps({
     color: #f44336;
 }
 
+.draw .result-badge {
+    background: rgba(255, 152, 0, 0.2);
+    color: #ff9800;
+}
+
 .match-date {
     color: #666;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 </style>

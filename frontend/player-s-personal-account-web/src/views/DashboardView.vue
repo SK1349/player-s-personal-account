@@ -110,19 +110,30 @@ const getFullImageUrl = (url) => {
 }
 
 const handleImageError = (e) => {
-  if (e.target.src.includes('user') || e.target.src.includes('data:')) {
+  if (e.target.src.includes('user') || e.target.src.includes('')) {
     return
   }
   e.target.src = userIcon
 }
 
 onMounted(async () => {
-  if (authStore.userId) {
+  try {
+    if (!authStore.isAuthenticated || !authStore.userId) {
+      router.replace('/login')
+      return
+    }
+
     await authStore.fetchProfile()
     user.value = authStore.user || {}
-    loadTabData(activeTab.value)
-  } else {
-    user.value = { nickname: 'TestPlayer', level: 5, rating: 1500, avatarUrl: '' }
+    await loadTabData(activeTab.value)
+
+  } catch (e) {
+    if (e.response?.status === 401 || e.response?.status === 403) {
+      authStore.logout()
+      router.replace('/login')
+      return
+    }
+    user.value = authStore.user || {}
   }
 })
 
@@ -131,18 +142,38 @@ const loadTabData = async (tabId) => {
 
   try {
     if (tabId === 'stats') {
-      const res = await api.get(`/users/${authStore.userId}/stats`).catch(() => ({ data: null }))
-      stats.value = res.data || { wins: 0, losses: 0, kdr: 0, totalMatches: 0, winRate: 0 }
+      const res = await api.get(`/user-stats/${authStore.userId}`)
+      stats.value = res.data || {
+        matchesPlayed: 0, wins: 0, losses: 0, draws: 0,
+        totalKills: 0, totalDeaths: 0, winRate: 0, kdRatio: 0
+      }
     }
+
     if (tabId === 'achievements') {
       await fetchAchievements()
     }
+
     if (tabId === 'matches') {
-      const res = await api.get(`/users/${authStore.userId}/matches`).catch(() => ({ data: mockMatches }))
-      matches.value = res.data || mockMatches
+      try {
+        const res = await api.get(`/users/${authStore.userId}/history`)
+
+        matches.value = (res.data || []).map(match => ({
+          id: match.matchId || match.id,
+          opponent: match.opponentNickname || 'Противник',
+          result: (match.result || 'LOSS').toLowerCase(),
+          score: `${match.kills || 0}:${match.deaths || 0}`,
+          date: match.playedAt ? new Date(match.playedAt).toLocaleDateString('ru-RU', {
+            day: '2-digit', month: '2-digit', year: 'numeric'
+          }) : 'Не указана',
+          map: match.mapOrMode || 'Unknown'
+        }))
+
+      } catch (e) {
+        matches.value = mockMatches
+      }
     }
   } catch (e) {
-    console.error(`Ошибка загрузки вкладки ${tabId}:`, e)
+    // обработка ошибки
   }
 }
 
@@ -175,7 +206,6 @@ const fetchAchievements = async () => {
     }))
 
   } catch (e) {
-    console.error('Ошибка загрузки достижений:', e)
     achievements.value = []
   }
 }
@@ -244,10 +274,7 @@ watch(
   max-width: 140px;
 }
 
-.level {
-  color: #888;
-  font-size: 0.9rem;
-}
+.level { color: #888; font-size: 0.9rem; }
 
 .tabs {
   flex: 1;
@@ -271,15 +298,8 @@ watch(
   gap: 12px;
 }
 
-.tabs button:hover {
-  background: #0f3460;
-  color: #fff;
-}
-
-.tabs button.active {
-  background: #e94560;
-  color: #fff;
-}
+.tabs button:hover { background: #0f3460; color: #fff; }
+.tabs button.active { background: #e94560; color: #fff; }
 
 .tab-icon {
   width: 24px;
@@ -288,9 +308,7 @@ watch(
   flex-shrink: 0;
 }
 
-.tab-name {
-  white-space: nowrap;
-}
+.tab-name { white-space: nowrap; }
 
 .logout-btn {
   background: none;
@@ -303,10 +321,7 @@ watch(
   transition: all 0.2s;
 }
 
-.logout-btn:hover {
-  background: #ff4d4d;
-  color: #fff;
-}
+.logout-btn:hover { background: #ff4d4d; color: #fff; }
 
 .content {
   flex: 1;
@@ -314,34 +329,7 @@ watch(
   overflow-y: auto;
 }
 
-.tab-panel {
-  animation: fadeIn 0.3s ease;
-}
-
-.loading-state,
-.error-state {
-  text-align: center;
-  padding: 40px;
-  color: #aaa;
-}
-
-.error-state {
-  color: #ff6b6b;
-}
-
-.retry-btn {
-  margin-top: 16px;
-  padding: 10px 24px;
-  background: #e94560;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.retry-btn:hover {
-  background: #d63850;
-}
+.tab-panel { animation: fadeIn 0.3s ease; }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
