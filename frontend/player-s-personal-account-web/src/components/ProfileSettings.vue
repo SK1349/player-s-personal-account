@@ -91,7 +91,7 @@
     </details>
 
     <p v-if="error" class="error">{{ error }}</p>
-    <p v-if="success" class="success">✅ Профиль обновлён!</p>
+    <p v-if="success" class="success">Профиль обновлён!</p>
 
     <button type="submit" :disabled="loading">
       {{ loading ? 'Сохранение...' : 'Сохранить изменения' }}

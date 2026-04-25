@@ -18,12 +18,12 @@
             </div>
           </div>
 
-           <div class="stat-card primary">
-             <div class="stat-content">
-               <span class="stat-label">Всего матчей</span>
-               <span class="stat-value">{{ safeStats.matchesPlayed ?? 0 }}</span>
-             </div>
-           </div>
+          <div class="stat-card primary">
+            <div class="stat-content">
+              <span class="stat-label">Всего матчей</span>
+              <span class="stat-value">{{ safeStats.matchesPlayed ?? 0 }}</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -43,6 +43,12 @@
         </div>
       </div>
     </div>
+
+    <RatingTrend
+      :key="matches.length"
+      :matches="matches"
+      :current-rating="user?.rating ?? null"
+    />
   </div>
 </template>
 
@@ -50,11 +56,14 @@
 import { computed } from 'vue'
 import { Pie } from 'vue-chartjs'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
+import RatingTrend from './RatingTrend.vue'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
 const props = defineProps({
-  stats: { type: Object, default: () => null }
+  stats: { type: Object, default: () => null },
+  matches: { type: Array, default: () => [] },
+  user: { type: Object, default: () => ({}) }
 })
 
 const safeStats = computed(() => props.stats || {

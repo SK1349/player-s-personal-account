@@ -36,7 +36,7 @@
       </div>
 
       <div v-else-if="activeTab === 'stats'" class="tab-panel">
-        <StatsPanel :stats="stats" />
+        <StatsPanel :stats="stats" :matches="rawMatches" :user="user" />
       </div>
 
       <div v-else-if="activeTab === 'achievements'" class="tab-panel">
@@ -96,12 +96,7 @@ const user = ref({})
 const stats = ref(null)
 const achievements = ref([])
 const matches = ref([])
-
-const mockMatches = [
-  { id: 1, opponent: 'Team Alpha', result: 'win', score: '16:12', date: '2026-04-18', map: 'Dust2' },
-  { id: 2, opponent: 'ProGaming', result: 'loss', score: '14:16', date: '2026-04-17', map: 'Mirage' },
-  { id: 3, opponent: 'Noobs United', result: 'win', score: '16:5', date: '2026-04-15', map: 'Inferno' }
-]
+const rawMatches = ref([])
 
 const getFullImageUrl = (url) => {
   if (!url) return userIcon
@@ -147,6 +142,14 @@ const loadTabData = async (tabId) => {
         matchesPlayed: 0, wins: 0, losses: 0, draws: 0,
         totalKills: 0, totalDeaths: 0, winRate: 0, kdRatio: 0
       }
+
+      try {
+        const matchesRes = await api.get(`/users/${authStore.userId}/history`)
+        rawMatches.value = matchesRes.data || []
+      } catch (e) {
+        console.warn('⚠️ Не удалось загрузить историю для графика:', e)
+        rawMatches.value = []
+      }
     }
 
     if (tabId === 'achievements') {
@@ -160,6 +163,7 @@ const loadTabData = async (tabId) => {
         matches.value = (res.data || []).map(match => ({
           id: match.matchId || match.id,
           opponent: match.opponentNickname || 'Противник',
+          opponentAvatar: match.opponentAvatarUrl || null,
           result: (match.result || 'LOSS').toLowerCase(),
           score: `${match.kills || 0}:${match.deaths || 0}`,
           date: match.playedAt ? new Date(match.playedAt).toLocaleDateString('ru-RU', {
@@ -168,12 +172,14 @@ const loadTabData = async (tabId) => {
           map: match.mapOrMode || 'Unknown'
         }))
 
+        rawMatches.value = res.data || []
+
       } catch (e) {
-        matches.value = mockMatches
+        console.error('Ошибка загрузки матчей:', e)
       }
     }
   } catch (e) {
-    // обработка ошибки
+    console.error(`Ошибка загрузки вкладки ${tabId}:`, e)
   }
 }
 
@@ -206,6 +212,7 @@ const fetchAchievements = async () => {
     }))
 
   } catch (e) {
+    console.error('Ошибка загрузки достижений:', e)
     achievements.value = []
   }
 }

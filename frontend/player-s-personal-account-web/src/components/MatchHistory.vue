@@ -11,8 +11,16 @@
       :class="match.result"
     >
       <div class="match-info">
-        <span class="opponent">vs {{ match.opponent }}</span>
-        <span class="map">{{ match.map }}</span>
+        <img
+          :src="getOpponentAvatar(match.opponentAvatar)"
+          :alt="match.opponent"
+          class="opponent-avatar"
+          @error="handleAvatarError"
+        />
+        <div class="opponent-text">
+          <span class="opponent">vs {{ match.opponent }}</span>
+          <span class="map">{{ match.map }}</span>
+        </div>
       </div>
 
       <div class="match-score">
@@ -30,6 +38,9 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
+import defaultAvatar from '../assets/user.png'
+
 const props = defineProps({
   matches: {
     type: Array,
@@ -44,6 +55,16 @@ const getResultText = (result) => {
     'draw': 'Ничья'
   }
   return texts[result] || 'Поражение'
+}
+
+const getOpponentAvatar = (avatarUrl) => {
+  if (!avatarUrl) return defaultAvatar
+  if (avatarUrl.startsWith('http')) return avatarUrl
+  return `http://localhost:8084${avatarUrl}`
+}
+
+const handleAvatarError = (e) => {
+  e.target.src = defaultAvatar
 }
 </script>
 
@@ -93,8 +114,24 @@ const getResultText = (result) => {
 
 .match-info {
     display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.opponent-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #3a507a;
+    flex-shrink: 0;
+}
+
+.opponent-text {
+    display: flex;
     flex-direction: column;
     gap: 4px;
+    min-width: 0;
 }
 
 .opponent {
