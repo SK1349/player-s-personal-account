@@ -11,6 +11,7 @@ import com.example.player_s_personal_account.exception.UserNotFoundException;
 import com.example.player_s_personal_account.repository.MatchPlayerRepository;
 import com.example.player_s_personal_account.repository.UserRepository;
 import com.example.player_s_personal_account.repository.UserStatsRepository;
+import com.example.player_s_personal_account.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ public class UserService {
     private final MatchPlayerRepository matchPlayerRepo;
     private final StatsCalculationService statsCalculationService;
     private final UserStatsRepository statsRepo;
+    private final JwtUtil jwtUtil;
 
     @Transactional
     public UserResponse register(RegisterRequest request) {
@@ -59,7 +61,10 @@ public class UserService {
                 .level(1)
                 .build();
 
-        return UserResponse.of(userRepository.save(user));
+        UserEntity savedUser = userRepository.save(user);
+        String token = jwtUtil.generateToken(savedUser.getEmail());
+
+        return UserResponse.of(savedUser, token);
     }
 
     public UserResponse getById(Long id) {

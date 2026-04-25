@@ -66,6 +66,7 @@ public class UserEntity {
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
+    @Builder.Default
     private Integer experience = 0;
 
 }
