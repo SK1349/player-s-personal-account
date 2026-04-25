@@ -14,4 +14,5 @@ public interface MatchPlayerRepository extends JpaRepository<MatchPlayerEntity, 
     List<MatchPlayerEntity> findByUserIdOrderByMatchPlayedAtAsc(Long userId);
     boolean existsByUserId(Long userId);
     Optional<MatchPlayerEntity> findByMatchIdAndUserIdNot(Long matchId, Long userId);
+    List<MatchPlayerEntity> findByUserIdAndMatchIdGreaterThanOrderByMatchIdAsc(Long userId, Long lastMatchId);
 }

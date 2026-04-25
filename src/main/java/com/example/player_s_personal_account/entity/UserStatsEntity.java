@@ -37,4 +37,7 @@ public class UserStatsEntity {
 
     @Column(name = "total_deaths")
     private Integer totalDeaths = 0;
+
+    @Column(name = "last_processed_match_id")
+    private Long lastProcessedMatchId;
 }

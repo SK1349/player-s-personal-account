@@ -8,6 +8,7 @@ import com.example.player_s_personal_account.exception.UserNotFoundException;
 import com.example.player_s_personal_account.repository.MatchPlayerRepository;
 import com.example.player_s_personal_account.repository.UserRepository;
 import com.example.player_s_personal_account.repository.UserStatsRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,12 @@ public class StatsCalculationService {
         return recalculateAndSave(userId);
     }
 
+    @PostConstruct
+    @Transactional
+    public void initAppData() {
+        recalculateAll();
+    }
+
     @Transactional
     public void recalculateAll() {
         userRepo.findAll().forEach(user -> recalculateAndSave(user.getId()));
@@ -39,47 +46,69 @@ public class StatsCalculationService {
         UserEntity user = userRepo.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        List<MatchPlayerEntity> matches = matchPlayerRepo.findByUserIdOrderByMatchPlayedAtAsc(userId);
+        UserStatsEntity stats = statsRepo.findByUserId(userId)
+                .orElseGet(() -> {
+                    UserStatsEntity newStats = new UserStatsEntity();
+                    newStats.setUser(user);
+                    newStats.setLastProcessedMatchId(0L);
+                    return newStats;
+                });
 
-        int wins = 0, losses = 0, draws = 0, totalKills = 0, totalDeaths = 0;
-        int currentRating = user.getRating();
+        Long lastId = stats.getLastProcessedMatchId() != null ? stats.getLastProcessedMatchId() : 0L;
 
-        for (MatchPlayerEntity mp : matches) {
-            String result = mp.getResult().toUpperCase();
-            switch (result) {
-                case "WIN" -> wins++;
-                case "LOSS" -> losses++;
-                case "DRAW" -> draws++;
-            }
-            totalKills += mp.getKills() != null ? mp.getKills() : 0;
-            totalDeaths += mp.getDeaths() != null ? mp.getDeaths() : 0;
-
-            currentRating = eloRatingService.calculateNewRating(
-                    currentRating, 1000, result);
+        List<MatchPlayerEntity> newMatches;
+        if (lastId == 0) {
+            newMatches = matchPlayerRepo.findByUserIdOrderByMatchPlayedAtAsc(userId);
+        } else {
+            newMatches = matchPlayerRepo.findByUserIdAndMatchIdGreaterThanOrderByMatchIdAsc(userId, lastId);
         }
 
+        if (newMatches.isEmpty()) {
+            return buildResponse(stats);
+        }
+
+        int currentRating = user.getRating();
+
+        int deltaWins = 0, deltaLosses = 0, deltaDraws = 0;
+        int deltaKills = 0, deltaDeaths = 0;
+        Long maxMatchId = lastId;
+        int deltaXp = 0;
+
+        for (MatchPlayerEntity mp : newMatches) {
+            String result = mp.getResult().toUpperCase();
+            switch (result) {
+                case "WIN" -> deltaWins++;
+                case "LOSS" -> deltaLosses++;
+                case "DRAW" -> deltaDraws++;
+            }
+            deltaKills += mp.getKills() != null ? mp.getKills() : 0;
+            deltaDeaths += mp.getDeaths() != null ? mp.getDeaths() : 0;
+
+            int oppRating = mp.getOpponentRatingSnapshot() != null ? mp.getOpponentRatingSnapshot() : 1000;
+            currentRating = eloRatingService.calculateNewRating(currentRating, oppRating, result);
+            deltaXp += calculateXpForMatch(result, currentRating, oppRating);
+
+            maxMatchId = mp.getMatch().getId();
+        }
+
+        stats.setWins((stats.getWins() != null ? stats.getWins() : 0) + deltaWins);
+        stats.setLosses((stats.getLosses() != null ? stats.getLosses() : 0) + deltaLosses);
+        stats.setDraws((stats.getDraws() != null ? stats.getDraws() : 0) + deltaDraws);
+        stats.setTotalKills((stats.getTotalKills() != null ? stats.getTotalKills() : 0) + deltaKills);
+        stats.setTotalDeaths((stats.getTotalDeaths() != null ? stats.getTotalDeaths() : 0) + deltaDeaths);
+        stats.setMatchesPlayed(stats.getWins() + stats.getLosses() + stats.getDraws());
+
+        stats.setLastProcessedMatchId(maxMatchId);
+
         user.setRating(Math.max(0, currentRating));
-        user.setLevel(calculateLevelFromRating(currentRating));
+
+        int currentExp = user.getExperience() != null ? user.getExperience() : 0;
+        user.setExperience(currentExp + deltaXp);
+
+        int newLevel = calculateLevelFromXp(user.getExperience());
+        user.setLevel(Math.max(user.getLevel() != null ? user.getLevel() : 1, newLevel));
+
         userRepo.save(user);
-
-        UserStatsEntity stats = statsRepo.findByUserId(userId).orElseGet(() -> {
-            UserStatsEntity newStats = new UserStatsEntity();
-            newStats.setUser(user);
-            newStats.setMatchesPlayed(0);
-            newStats.setWins(0);
-            newStats.setLosses(0);
-            newStats.setDraws(0);
-            newStats.setTotalKills(0);
-            newStats.setTotalDeaths(0);
-            return newStats;
-        });
-
-        stats.setMatchesPlayed(matches.size());
-        stats.setWins(wins);
-        stats.setLosses(losses);
-        stats.setDraws(draws);
-        stats.setTotalKills(totalKills);
-        stats.setTotalDeaths(totalDeaths);
         statsRepo.save(stats);
 
         UserStatsResponse response = buildResponse(stats);
@@ -114,8 +143,18 @@ public class StatsCalculationService {
                 .build();
     }
 
-    private int calculateLevelFromRating(int rating) {
-        int baseRating = 1000;
-        return 1 + (int) Math.sqrt((rating - baseRating) / 25.0);
+    private int calculateLevelFromXp(int experience) {
+        return 1 + (int) Math.sqrt(Math.max(0, experience) / 50.0);
+    }
+
+    private int calculateXpForMatch(String result, int playerRating, int opponentRating) {
+        int base = switch (result) {
+            case "WIN" -> 30;
+            case "DRAW" -> 15;
+            case "LOSS" -> 10;
+            default -> 5;
+        };
+        int diffBonus = Math.max(0, (opponentRating - playerRating) / 100);
+        return base + diffBonus;
     }
 }

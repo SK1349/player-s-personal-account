@@ -34,6 +34,6 @@ public class MatchPlayerEntity {
     @Column(nullable = false)
     private Integer deaths;
 
-    @Column(nullable = false)
-    private Integer assists;
+    @Column(name = "opponent_rating_snapshot")
+    private Integer opponentRatingSnapshot;
 }

@@ -17,9 +17,9 @@ public class MatchHistoryResponse {
     private Integer deaths;
     private Double kdRatio;
     private String opponentNickname;
-    private Integer opponentRating;
+    private String opponentAvatarUrl;
 
-    public static MatchHistoryResponse of(MatchPlayerEntity mp, String opponentNickname, Integer opponentRating) {
+    public static MatchHistoryResponse of(MatchPlayerEntity mp, String opponentNickname, Integer opponentRating,  String opponentAvatarUrl) {
         double kd = mp.getDeaths() != null && mp.getDeaths() > 0
                 ? Math.round((double) mp.getKills() / mp.getDeaths() * 100.0) / 100.0
                 : (double) mp.getKills();
@@ -33,7 +33,7 @@ public class MatchHistoryResponse {
                 .deaths(mp.getDeaths())
                 .kdRatio(kd)
                 .opponentNickname(opponentNickname != null ? opponentNickname : "Unknown")
-                .opponentRating(opponentRating)
+                .opponentAvatarUrl(opponentAvatarUrl)
                 .build();
     }
 }

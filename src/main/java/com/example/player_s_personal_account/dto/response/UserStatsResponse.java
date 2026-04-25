@@ -15,7 +15,6 @@ public class UserStatsResponse {
     private Integer draws;
     private Integer totalKills;
     private Integer totalDeaths;
-
     private Double winRate;
     private Double kdRatio;
 

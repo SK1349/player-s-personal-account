@@ -24,6 +24,7 @@ public class UserResponse {
     private Integer rating;
     private Integer level;
     private LocalDateTime createdAt;
+    private Integer experience;
 
     public static UserResponse of(UserEntity user) {
         return UserResponse.builder()
@@ -39,6 +40,7 @@ public class UserResponse {
                 .phone(user.getPhone())
                 .rating(user.getRating())
                 .level(user.getLevel())
+                .experience(user.getExperience())
                 .bio(user.getBio())
                 .createdAt(user.getCreatedAt())
                 .build();

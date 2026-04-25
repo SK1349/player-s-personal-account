@@ -18,8 +18,9 @@ public class MatchPlayerResponse {
                 .id(e.getId())
                 .matchId(e.getMatch().getId())
                 .userId(e.getUser().getId())
-                .result(e.getResult()).kills(e.getKills())
-                .deaths(e.getDeaths()).assists(e.getAssists())
+                .result(e.getResult())
+                .kills(e.getKills())
+                .deaths(e.getDeaths())
                 .build();
     }
 }

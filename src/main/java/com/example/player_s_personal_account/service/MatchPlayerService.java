@@ -35,7 +35,6 @@ public class MatchPlayerService {
                 .result(req.getResult())
                 .kills(req.getKills())
                 .deaths(req.getDeaths())
-                .assists(req.getAssists())
                 .build();
 
         return MatchPlayerResponse.of(repo.save(entity));
@@ -51,7 +50,6 @@ public class MatchPlayerService {
         if (req.getResult() != null) entity.setResult(req.getResult());
         if (req.getKills() != null) entity.setKills(req.getKills());
         if (req.getDeaths() != null) entity.setDeaths(req.getDeaths());
-        if (req.getAssists() != null) entity.setAssists(req.getAssists());
         return MatchPlayerResponse.of(repo.save(entity));
     }
 
