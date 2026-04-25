@@ -26,6 +26,7 @@ CREATE TABLE users (
     bio TEXT,
     rating INTEGER NOT NULL DEFAULT 1000,
     level INTEGER NOT NULL DEFAULT 1,
+    experience INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -51,17 +52,18 @@ CREATE TABLE user_stats (
     matches_played INTEGER NOT NULL DEFAULT 0,
     total_deaths INTEGER NOT NULL DEFAULT 0,
     total_kills INTEGER NOT NULL DEFAULT 0,
-    wins INTEGER NOT NULL DEFAULT 0
+    wins INTEGER NOT NULL DEFAULT 0,
+    last_processed_match_id BIGINT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE match_players (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    assists INTEGER NOT NULL DEFAULT 0,
     deaths INTEGER NOT NULL DEFAULT 0,
     kills INTEGER NOT NULL DEFAULT 0,
     match_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
     match_result VARCHAR(10) NOT NULL,
+    opponent_rating_snapshot INTEGER NOT NULL DEFAULT 1000,
     UNIQUE (match_id, user_id)
 );
 

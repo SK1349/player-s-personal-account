@@ -11,6 +11,7 @@ import com.example.player_s_personal_account.exception.UserNotFoundException;
 import com.example.player_s_personal_account.repository.MatchPlayerRepository;
 import com.example.player_s_personal_account.repository.UserRepository;
 import com.example.player_s_personal_account.repository.UserStatsRepository;
+import com.example.player_s_personal_account.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ public class UserService {
     private final MatchPlayerRepository matchPlayerRepo;
     private final StatsCalculationService statsCalculationService;
     private final UserStatsRepository statsRepo;
+    private final JwtUtil jwtUtil;
 
     @Transactional
     public UserResponse register(RegisterRequest request) {
@@ -59,7 +61,10 @@ public class UserService {
                 .level(1)
                 .build();
 
-        return UserResponse.of(userRepository.save(user));
+        UserEntity savedUser = userRepository.save(user);
+        String token = jwtUtil.generateToken(savedUser.getEmail());
+
+        return UserResponse.of(savedUser, token);
     }
 
     public UserResponse getById(Long id) {
@@ -84,11 +89,33 @@ public class UserService {
     private static final String UPLOAD_DIR = "./uploads/avatars/";
 
     private String saveNewAvatar(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Avatar file is required");
+        }
+
+        long maxSize = 5 * 1024 * 1024;
+        if (file.getSize() > maxSize) {
+            throw new IllegalArgumentException("Avatar must not exceed 5MB. Current size: " +
+                    file.getSize() / 1024 / 1024 + "MB");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("Only image files are allowed (JPEG, PNG)");
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !originalFilename.matches(".*\\.(jpg|jpeg|png)$")) {
+            throw new IllegalArgumentException("Only .jpg, .jpeg, .png files are allowed");
+        }
+
+        String fileName = System.currentTimeMillis() + "_" +
+                originalFilename.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+
         try {
             Path dir = Paths.get(UPLOAD_DIR);
             if (!Files.exists(dir)) Files.createDirectories(dir);
 
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
             Path destination = dir.resolve(fileName);
 
             Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
@@ -173,13 +200,15 @@ public class UserService {
 
                     String opponentNickname = "Unknown";
                     Integer opponentRating = 1000;
+                    String opponentAvatarUrl = null;
 
                     if (opponentEntry != null && opponentEntry.getUser() != null) {
                         opponentNickname = opponentEntry.getUser().getNickname();
                         opponentRating = opponentEntry.getUser().getRating();
+                        opponentAvatarUrl = opponentEntry.getUser().getAvatarUrl();
                     }
 
-                    return MatchHistoryResponse.of(mp, opponentNickname, opponentRating);
+                    return MatchHistoryResponse.of(mp, opponentNickname, opponentRating, opponentAvatarUrl);
                 })
                 .collect(Collectors.toList());
     }
