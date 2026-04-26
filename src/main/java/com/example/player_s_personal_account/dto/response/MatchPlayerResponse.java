@@ -12,7 +12,6 @@ public class MatchPlayerResponse {
     private String result;
     private Integer kills;
     private Integer deaths;
-    private Integer assists;
     public static MatchPlayerResponse of(MatchPlayerEntity e) {
         return MatchPlayerResponse.builder()
                 .id(e.getId())
