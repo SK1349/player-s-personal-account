@@ -87,6 +87,16 @@ onMounted(render)
     padding: 24px;
     margin-top: 24px;
 }
+
+.chart-card h3 {
+    margin: 0 auto 20px auto;
+    text-align: center;
+    width: 100%;
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
 .chart-wrapper {
     position: relative;
     height: 200px;
