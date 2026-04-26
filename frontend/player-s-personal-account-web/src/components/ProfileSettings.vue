@@ -226,6 +226,7 @@ const handleSubmit = async () => {
 .settings-form {
   background: #16213e;
   border-radius: 12px;
+  border: 2px solid #3a507a;
   padding: 24px;
   max-width: 600px;
   display: flex;
@@ -235,7 +236,7 @@ const handleSubmit = async () => {
 
 .form-section {
   padding-bottom: 20px;
-  border-bottom: 1px solid #0f3460;
+  border-bottom: 1px solid #3a507a;
 }
 .form-section:last-child {
   border-bottom: none;
@@ -244,7 +245,7 @@ const handleSubmit = async () => {
 
 .form-section h3 {
   margin: 0 0 16px 0;
-  color: #e94560;
+  color: #ff4d4d;
   font-size: 1.1rem;
 }
 
@@ -276,7 +277,7 @@ const handleSubmit = async () => {
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #e94560;
+  border-color: #ff4d4d;
 }
 
 .form-group input.disabled {
@@ -308,7 +309,7 @@ const handleSubmit = async () => {
   cursor: pointer;
 }
 .file-input:hover {
-  border-color: #e94560;
+  border-color: #ff4d4d;
 }
 
 .avatar-preview {
@@ -345,7 +346,7 @@ const handleSubmit = async () => {
 }
 
 .error {
-  color: #ff6b6b;
+  color: #ff4d4d;
   margin: 8px 0;
   font-size: 0.9rem;
   background: rgba(255, 107, 107, 0.1);
@@ -364,8 +365,8 @@ const handleSubmit = async () => {
 button {
   width: 100%;
   padding: 14px;
-  background: #e94560;
-  color: white;
+  background: #ff4d4d;
+  color: #fff;
   border: none;
   border-radius: 8px;
   font-size: 1rem;
@@ -374,10 +375,10 @@ button {
   transition: background 0.2s;
 }
 button:hover:not(:disabled) {
-  background: #d63850;
+  background: #ff4d4d;
 }
 button:disabled {
-  background: #8a3a4a;
+  background: #ff4d4d;
   cursor: not-allowed;
   opacity: 0.7;
 }

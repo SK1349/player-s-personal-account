@@ -1,9 +1,9 @@
 <template>
   <div class="chart-card">
-    <h3>📈 Динамика рейтинга</h3>
+    <h3>Динамика рейтинга</h3>
     <div class="chart-wrapper">
       <canvas ref="chartRef" style="border: 2px solid red; display: block;"></canvas>
-      <div v-if="!chartData" class="placeholder">📭 Нет данных</div>
+      <div v-if="!chartData" class="placeholder">Нет данных</div>
     </div>
     <div class="current-rating" v-if="currentRating !== null">
       <span class="rating-value">{{ currentRating }}</span>
@@ -92,7 +92,6 @@ const renderChart = async () => {
 watch(() => props.matches, renderChart, { deep: true })
 
 onMounted(() => {
-  console.log('🚀 RatingTrend mounted')
   renderChart()
 })
 </script>
@@ -116,6 +115,6 @@ onMounted(() => {
 .current-rating {
   margin-top: 16px; text-align: center; padding-top: 16px;
   border-top: 1px solid rgba(255,255,255,0.05);
-  color: #e94560; font-size: 1.5rem; font-weight: bold;
+  color: #ff4d4d; font-size: 1.5rem; font-weight: bold;
 }
 </style>

@@ -10,21 +10,33 @@
       class="match-item"
       :class="match.result"
     >
-      <div class="match-info">
-        <img
-          :src="getOpponentAvatar(match.opponentAvatar)"
-          :alt="match.opponent"
-          class="opponent-avatar"
-          @error="handleAvatarError"
-        />
-        <div class="opponent-text">
-          <span class="opponent">vs {{ match.opponent }}</span>
-          <span class="map">{{ match.map }}</span>
-        </div>
+      <div class="match-map-info">
+        <span class="map-name">{{ match.map }}</span>
       </div>
 
-      <div class="match-score">
+      <div class="match-faceoff">
+        <!-- Ваш профиль -->
+        <div class="player-card">
+          <img
+            :src="getCurrentPlayerAvatar(match.playerAvatar)"
+            :alt="Вы"
+            class="avatar-small"
+            @error="handleAvatarError"
+          />
+          <span class="nickname">{{ currentPlayerNickname }}</span>
+        </div>
+
         <span class="score-value">{{ match.score }}</span>
+
+        <div class="player-card">
+          <img
+            :src="getOpponentAvatar(match.opponentAvatar)"
+            :alt="match.opponent"
+            class="avatar-small"
+            @error="handleAvatarError"
+          />
+          <span class="nickname">{{ match.opponent }}</span>
+        </div>
       </div>
 
       <div class="match-meta">
@@ -45,6 +57,14 @@ const props = defineProps({
   matches: {
     type: Array,
     default: () => []
+  },
+  currentPlayerNickname: {
+    type: String,
+    default: 'Вы'
+  },
+  currentPlayerAvatar: {
+    type: String,
+    default: ''
   }
 })
 
@@ -63,6 +83,12 @@ const getOpponentAvatar = (avatarUrl) => {
   return `http://localhost:8084${avatarUrl}`
 }
 
+const getCurrentPlayerAvatar = (avatarUrl) => {
+  if (!avatarUrl) return defaultAvatar
+  if (avatarUrl.startsWith('http')) return avatarUrl
+  return `http://localhost:8084${avatarUrl}`
+}
+
 const handleAvatarError = (e) => {
   e.target.src = defaultAvatar
 }
@@ -70,125 +96,139 @@ const handleAvatarError = (e) => {
 
 <style scoped>
 .matches-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .empty-state {
-    text-align: center;
-    padding: 40px;
-    color: #888;
-    background: #16213e;
-    border-radius: 10px;
+  text-align: center;
+  padding: 40px;
+  color: #888;
+  background: #16213e;
+  border-radius: 10px;
 }
 
 .match-item {
-    background: #16213e;
-    border-radius: 10px;
-    padding: 16px 20px;
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    gap: 20px;
-    border-left: 4px solid transparent;
-    transition: transform 0.2s, box-shadow 0.2s;
+  background: #16213e;
+  border-radius: 10px;
+  border: 2px solid #3a507a;
+  padding: 12px 20px;
+  display: grid;
+  grid-template-columns: 100px 1fr 120px;
+  align-items: center;
+  gap: 20px;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .match-item:hover {
-    transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.match-item.win {
-    border-left-color: #4caf50;
+.match-map-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
 }
 
-.match-item.loss {
-    border-left-color: #f44336;
+.map-name {
+  color: #888;
+  font-size: 0.85rem;
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.match-item.draw {
-    border-left-color: #ff9800;
+.match-faceoff {
+  display: grid;
+  grid-template-columns: 80px 100px 80px;
+  align-items: center;
+  justify-content: center;
+  gap: 0; /* 👈 УБРАЛ gap вообще */
+  min-width: 0;
 }
 
-.match-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.player-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 80px;
+  min-width: 0;
 }
 
-.opponent-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #3a507a;
-    flex-shrink: 0;
+.avatar-small {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #3a507a;
+  flex-shrink: 0;
 }
 
-.opponent-text {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-}
-
-.opponent {
-    font-weight: 600;
-    font-size: 1.1rem;
-    color: #fff;
-}
-
-.map {
-    color: #888;
-    font-size: 0.85rem;
-    font-family: 'Courier New', monospace;
-}
-
-.match-score {
-    text-align: center;
+.nickname {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .score-value {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #fff;
-    font-family: 'Courier New', monospace;
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  width: 100px;
+  text-align: center;
+  justify-self: center;
 }
 
 .match-meta {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  min-width: 0;
 }
 
 .result-badge {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    white-space: nowrap;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .win .result-badge {
-    background: rgba(76, 175, 80, 0.2);
-    color: #4caf50;
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
 }
 
 .loss .result-badge {
-    background: rgba(244, 67, 54, 0.2);
-    color: #f44336;
+  background: rgba(244, 67, 54, 0.2);
+  color: #ff4d4d;
 }
 
 .draw .result-badge {
-    background: rgba(255, 152, 0, 0.2);
-    color: #ff9800;
+  background: rgba(255, 152, 0, 0.2);
+  color: #ff9800;
 }
 
 .match-date {
-    color: #666;
-    font-size: 0.85rem;
+  color: #666;
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 </style>

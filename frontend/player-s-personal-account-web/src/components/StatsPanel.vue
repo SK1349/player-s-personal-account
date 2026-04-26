@@ -127,7 +127,7 @@ const chartOptions = {
 .stats-container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
   padding: 16px;
   max-width: 1400px;
   margin: 0 auto;
@@ -136,23 +136,16 @@ const chartOptions = {
 .charts-grid {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
-  gap: 24px;
-}
-
-@media (max-width: 1024px) {
-  .charts-grid {
-    grid-template-columns: 1fr;
-  }
+  gap: 16px;
 }
 
 .chart-card {
-  background: linear-gradient(145deg, #16213e 0%, #1a2744 100%);
+  background: #16213e;
   border-radius: 16px;
-  padding: 24px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 2px solid #3a507a;
 }
 
 .chart-card h3 {
@@ -178,7 +171,7 @@ const chartOptions = {
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #666;
+  color: #888;
   font-style: italic;
 }
 
@@ -191,7 +184,7 @@ const chartOptions = {
 .kdr-value {
   font-size: 4rem;
   font-weight: bold;
-  background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+  background: #ff4d4d;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -218,7 +211,7 @@ const chartOptions = {
   flex-direction: column;
   gap: 8px;
   padding: 16px 24px;
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #3a507a;
   border-radius: 12px;
   min-width: 120px;
 }
@@ -234,7 +227,7 @@ const chartOptions = {
 }
 
 .kdr-stat .value.kill { color: #4caf50; }
-.kdr-stat .value.death { color: #f44336; }
+.kdr-stat .value.death { color: #ff4d4d; }
 
 .stats-row {
   display: grid;
@@ -249,13 +242,16 @@ const chartOptions = {
 }
 
 .stat-card {
-  background: linear-gradient(145deg, #16213e 0%, #1a2744 100%);
+justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: #16213e;
   border-radius: 12px;
   padding: 20px;
   display: flex;
   align-items: center;
   gap: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid #3a507a;
 }
 
 .stat-content {
@@ -277,7 +273,7 @@ const chartOptions = {
 }
 
 
-.stat-card.highlight .stat-value { color: #e94560; }
+.stat-card.highlight .stat-value { color: #ff4d4d; }
 
 
 .stat-card.primary .stat-value { color: #2196f3; }

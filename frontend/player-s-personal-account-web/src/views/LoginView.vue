@@ -63,7 +63,7 @@ const handleLogin = async () => {
   width: 100%;
   max-width: 400px;
   text-align: center;
-  color: white;
+  color: #fff;
 }
 input {
   width: 100%;
@@ -72,33 +72,33 @@ input {
   background: #0f3460;
   border: 1px solid #3a507a;
   border-radius: 6px;
-  color: white;
+  color: #fff;
   box-sizing: border-box;
 }
 button {
   width: 100%;
   padding: 12px;
   margin-top: 15px;
-  background: #e94560;
-  color: white;
+  background: #ff4d4d;
+  color: #fff;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
 }
 button:disabled {
-  background: #8a3a4a;
+  background: #ff4d4d;
   cursor: not-allowed;
 }
 .error {
-  color: #ff6b6b;
+  color: #ff4d4d;
   font-size: 0.9rem;
   margin: 10px 0;
 }
 .link {
   display: block;
   margin-top: 20px;
-  color: #e94560;
+  color: #ff4d4d;
   text-decoration: none;
 }
 .link:hover {
