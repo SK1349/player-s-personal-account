@@ -147,7 +147,6 @@ const loadTabData = async (tabId) => {
         const matchesRes = await api.get(`/users/${authStore.userId}/history`)
         rawMatches.value = matchesRes.data || []
       } catch (e) {
-        console.warn('⚠️ Не удалось загрузить историю для графика:', e)
         rawMatches.value = []
       }
     }
@@ -164,6 +163,7 @@ const loadTabData = async (tabId) => {
           id: match.matchId || match.id,
           opponent: match.opponentNickname || 'Противник',
           opponentAvatar: match.opponentAvatarUrl || null,
+          playerAvatar: authStore.user?.avatarUrl || null,
           result: (match.result || 'LOSS').toLowerCase(),
           score: `${match.kills || 0}:${match.deaths || 0}`,
           date: match.playedAt ? new Date(match.playedAt).toLocaleDateString('ru-RU', {

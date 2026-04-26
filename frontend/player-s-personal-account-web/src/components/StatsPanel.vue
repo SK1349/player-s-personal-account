@@ -45,8 +45,7 @@
     </div>
 
     <RatingTrend
-      :key="matches.length"
-      :matches="matches"
+      :rating-history="safeStats.ratingHistory ?? []"
       :current-rating="user?.rating ?? null"
     />
   </div>
@@ -62,13 +61,19 @@ ChartJS.register(ArcElement, Tooltip, Legend)
 
 const props = defineProps({
   stats: { type: Object, default: () => null },
-  matches: { type: Array, default: () => [] },
   user: { type: Object, default: () => ({}) }
 })
 
 const safeStats = computed(() => props.stats || {
-  matchesPlayed: 0, wins: 0, losses: 0, draws: 0,
-  totalKills: 0, totalDeaths: 0, winRate: 0, kdRatio: 0
+  matchesPlayed: 0,
+  wins: 0,
+  losses: 0,
+  draws: 0,
+  totalKills: 0,
+  totalDeaths: 0,
+  winRate: 0,
+  kdRatio: 0,
+  ratingHistory: []
 })
 
 const chartData = computed(() => {
@@ -235,12 +240,6 @@ const chartOptions = {
   gap: 16px;
 }
 
-@media (max-width: 640px) {
-  .stats-row {
-    grid-template-columns: 1fr;
-  }
-}
-
 .stat-card {
 justify-content: center;
   align-items: center;
@@ -272,16 +271,7 @@ justify-content: center;
   color: #fff;
 }
 
-
 .stat-card.highlight .stat-value { color: #ff4d4d; }
 
-
 .stat-card.primary .stat-value { color: #2196f3; }
-
-@media (max-width: 480px) {
-  .kdr-value { font-size: 3rem; }
-  .kdr-details { flex-direction: column; gap: 12px; }
-  .stat-card { padding: 16px; }
-  .stat-value { font-size: 1.5rem; }
-}
 </style>
