@@ -17,11 +17,6 @@ public class AchievementController {
 
     private final AchievementService service;
 
-    @PostMapping
-    public AchievementResponse create(@RequestBody @Valid CreateAchievementRequest request) {
-        return service.create(request);
-    }
-
     @GetMapping
     public List<AchievementResponse> getAll() {
         return service.getAll();
@@ -30,10 +25,5 @@ public class AchievementController {
     @GetMapping(AchievementRoutes.BY_ID)
     public AchievementResponse getById(@PathVariable Long id) {
         return service.getById(id);
-    }
-
-    @GetMapping(AchievementRoutes.BY_CODE)
-    public AchievementResponse getByCode(@PathVariable String code) {
-        return service.getByCode(code);
     }
 }

@@ -11,5 +11,4 @@ import java.util.Optional;
 public interface UserAchievementRepository extends JpaRepository<UserAchievementEntity, Long> {
     List<UserAchievementEntity> findByUserId(Long userId);
     boolean existsByUserIdAndAchievementCode(Long userId, String achievementCode);
-    Optional<UserAchievementEntity> findByUserIdAndAchievementId(Long userId, Long achievementId);
 }
