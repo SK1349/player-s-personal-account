@@ -1,8 +1,11 @@
 package com.example.player_s_personal_account.dto.response;
-import com.example.player_s_personal_account.entity.UserStatsEntity;
 
+import com.example.player_s_personal_account.entity.UserStatsEntity;
 import lombok.Builder;
 import lombok.Getter;
+
+import java.util.Collections;
+import java.util.List;
 
 @Builder
 @Getter
@@ -17,8 +20,13 @@ public class UserStatsResponse {
     private Integer totalDeaths;
     private Double winRate;
     private Double kdRatio;
+    private List<Integer> ratingHistory;
 
     public static UserStatsResponse of(UserStatsEntity e) {
+        return of(e, Collections.emptyList());
+    }
+
+    public static UserStatsResponse of(UserStatsEntity e, List<Integer> ratingHistory) {
         int matches = e.getMatchesPlayed() != null ? e.getMatchesPlayed() : 0;
         int wins = e.getWins() != null ? e.getWins() : 0;
         int losses = e.getLosses() != null ? e.getLosses() : 0;
@@ -28,7 +36,6 @@ public class UserStatsResponse {
 
         double winRate = matches > 0 ? Math.round((double) wins / matches * 1000.0) / 10.0 : 0.0;
         double kdRatio = deaths > 0 ? Math.round((double) kills / deaths * 100.0) / 100.0 : (double) kills;
-
 
         return UserStatsResponse.builder()
                 .userId(e.getUserId())
@@ -40,6 +47,7 @@ public class UserStatsResponse {
                 .totalDeaths(deaths)
                 .winRate(winRate)
                 .kdRatio(kdRatio)
+                .ratingHistory(ratingHistory != null ? ratingHistory : Collections.emptyList())
                 .build();
     }
 

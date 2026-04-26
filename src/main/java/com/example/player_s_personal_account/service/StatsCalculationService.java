@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -64,11 +66,11 @@ public class StatsCalculationService {
         }
 
         if (newMatches.isEmpty()) {
-            return buildResponse(stats);
+            return buildResponse(stats, matchPlayerRepo.findPlayerRatingAfterMatchByUserIdOrderByMatchPlayedAtAsc(userId));
         }
 
         int currentRating = user.getRating();
-
+        List<MatchPlayerEntity> matchesToUpdate = new ArrayList<>();
         int deltaWins = 0, deltaLosses = 0, deltaDraws = 0;
         int deltaKills = 0, deltaDeaths = 0;
         Long maxMatchId = lastId;
@@ -86,6 +88,8 @@ public class StatsCalculationService {
 
             int oppRating = mp.getOpponentRatingSnapshot() != null ? mp.getOpponentRatingSnapshot() : 1000;
             currentRating = eloRatingService.calculateNewRating(currentRating, oppRating, result);
+            mp.setPlayerRatingAfterMatch(currentRating);
+            matchesToUpdate.add(mp);
             deltaXp += calculateXpForMatch(result, currentRating, oppRating);
 
             maxMatchId = mp.getMatch().getId();
@@ -110,14 +114,18 @@ public class StatsCalculationService {
 
         userRepo.save(user);
         statsRepo.save(stats);
-
-        UserStatsResponse response = buildResponse(stats);
+        matchPlayerRepo.saveAll(matchesToUpdate);
+        List<Integer> history = matchPlayerRepo.findPlayerRatingAfterMatchByUserIdOrderByMatchPlayedAtAsc(userId);
+        UserStatsResponse response = buildResponse(stats, history);
         achievementAutoGrant.checkAndGrant(userId, response);
 
         return response;
     }
-
     private UserStatsResponse buildResponse(UserStatsEntity e) {
+        return buildResponse(e, Collections.emptyList());
+    }
+
+    private UserStatsResponse buildResponse(UserStatsEntity e, List<Integer> ratingHistory) {
         int matches = e.getMatchesPlayed() != null ? e.getMatchesPlayed() : 0;
         int wins = e.getWins() != null ? e.getWins() : 0;
         int deaths = e.getTotalDeaths() != null ? e.getTotalDeaths() : 0;
@@ -140,6 +148,7 @@ public class StatsCalculationService {
                 .totalDeaths(deaths)
                 .winRate(winRate)
                 .kdRatio(kdRatio)
+                .ratingHistory(ratingHistory != null ? ratingHistory : Collections.emptyList())
                 .build();
     }
 

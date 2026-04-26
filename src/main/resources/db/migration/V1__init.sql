@@ -64,6 +64,7 @@ CREATE TABLE match_players (
     user_id BIGINT NOT NULL,
     match_result VARCHAR(10) NOT NULL,
     opponent_rating_snapshot INTEGER NOT NULL DEFAULT 1000,
+    player_rating_after_match INTEGER NOT NULL DEFAULT 1000,
     UNIQUE (match_id, user_id)
 );
 

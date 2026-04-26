@@ -36,4 +36,7 @@ public class MatchPlayerEntity {
 
     @Column(name = "opponent_rating_snapshot")
     private Integer opponentRatingSnapshot;
+
+    @Column(name = "player_rating_after_match")
+    private Integer playerRatingAfterMatch;
 }
