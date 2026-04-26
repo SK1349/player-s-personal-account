@@ -50,21 +50,4 @@ public class UserStatsResponse {
                 .ratingHistory(ratingHistory != null ? ratingHistory : Collections.emptyList())
                 .build();
     }
-
-    public static UserStatsResponse fromCalculation(Long userId, int matches, int wins, int losses, int draws, int kills, int deaths) {
-        double winRate = matches > 0 ? Math.round((double) wins / matches * 1000.0) / 10.0 : 0.0;
-        double kdRatio = deaths > 0 ? Math.round((double) kills / deaths * 100.0) / 100.0 : (double) kills;
-
-        return UserStatsResponse.builder()
-                .userId(userId)
-                .matchesPlayed(matches)
-                .wins(wins)
-                .losses(losses)
-                .draws(draws)
-                .totalKills(kills)
-                .totalDeaths(deaths)
-                .winRate(winRate)
-                .kdRatio(kdRatio)
-                .build();
-    }
 }

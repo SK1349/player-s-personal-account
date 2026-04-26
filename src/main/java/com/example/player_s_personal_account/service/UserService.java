@@ -192,6 +192,10 @@ public class UserService {
         List<MatchPlayerEntity> myMatches = matchPlayerRepo
                 .findByUserIdOrderByMatchPlayedAtDesc(userId);
 
+        UserEntity currentUser = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        String currentAvatarUrl = currentUser.getAvatarUrl();
+
         return myMatches.stream()
                 .map(mp -> {
                     MatchPlayerEntity opponentEntry = matchPlayerRepo
@@ -208,7 +212,7 @@ public class UserService {
                         opponentAvatarUrl = opponentEntry.getUser().getAvatarUrl();
                     }
 
-                    return MatchHistoryResponse.of(mp, opponentNickname, opponentRating, opponentAvatarUrl);
+                    return MatchHistoryResponse.of(mp, opponentNickname, opponentRating, opponentAvatarUrl, currentAvatarUrl);
                 })
                 .collect(Collectors.toList());
     }

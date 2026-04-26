@@ -32,11 +32,11 @@ public class StatsCalculationService {
         return recalculateAndSave(userId);
     }
 
-    @PostConstruct
-    @Transactional
-    public void initAppData() {
-        recalculateAll();
-    }
+//    @PostConstruct
+//    @Transactional
+//    public void initAppData() {
+//        recalculateAll();
+//    }
 
     @Transactional
     public void recalculateAll() {
