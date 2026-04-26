@@ -19,6 +19,6 @@ defineProps(['kdr'])
 .kdr-value {
     font-size: 3rem;
     font-weight: bold;
-    color: #e94560;
+    color: #ff4d4d;
 }
 </style>

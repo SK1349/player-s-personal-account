@@ -252,7 +252,7 @@ watch(
   padding: 20px;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid #0f3460;
+  border-right: 2px solid #3a507a;
 }
 
 .user-mini {
@@ -260,7 +260,7 @@ watch(
   align-items: center;
   gap: 12px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #0f3460;
+  border-bottom: 1px solid #3a507a;
   margin-bottom: 24px;
 }
 
@@ -269,7 +269,7 @@ watch(
   height: 50px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #e94560;
+  border: 2px solid #ff4d4d;
 }
 
 .nickname {
@@ -281,7 +281,10 @@ watch(
   max-width: 140px;
 }
 
-.level { color: #888; font-size: 0.9rem; }
+.level {
+    color: #888;
+    font-size: 0.9rem;
+}
 
 .tabs {
   flex: 1;
@@ -293,7 +296,7 @@ watch(
 .tabs button {
   background: none;
   border: none;
-  color: #ccc;
+  color: #fff;
   padding: 12px 16px;
   text-align: left;
   cursor: pointer;
@@ -305,8 +308,15 @@ watch(
   gap: 12px;
 }
 
-.tabs button:hover { background: #0f3460; color: #fff; }
-.tabs button.active { background: #e94560; color: #fff; }
+.tabs button:hover {
+    background: #0f3460;
+    color: #fff;
+}
+
+.tabs button.active {
+    background: #ff4d4d;
+    color: #fff;
+}
 
 .tab-icon {
   width: 24px;

@@ -87,6 +87,7 @@ const handleImageError = (e) => {
     border-radius: 12px;
     padding: 24px;
     max-width: 600px;
+    border: 2px solid #3a507a;
 }
 
 .header {
@@ -94,7 +95,7 @@ const handleImageError = (e) => {
     gap: 20px;
     align-items: center;
     padding-bottom: 20px;
-    border-bottom: 1px solid #0f3460;
+    border-bottom: 1px solid #3a507a;
 }
 
 .avatar {
@@ -102,7 +103,7 @@ const handleImageError = (e) => {
     height: 120px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid #e94560;
+    border: 3px solid #ff4d4d;
 }
 
 .info h2 {
@@ -156,7 +157,7 @@ const handleImageError = (e) => {
 
 .details {
     padding-top: 20px;
-    color: #ccc;
+    color: #fff;
 }
 
 .details p {

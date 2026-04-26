@@ -73,9 +73,6 @@ const formatDate = (dateString) => {
 </script>
 
 <style scoped>
-.achievements-container {
-  padding: 8px;
-}
 
 .empty-state {
   text-align: center;
@@ -102,7 +99,6 @@ const formatDate = (dateString) => {
 
 .section-title.locked {
   color: #888;
-  border-left-color: #555;
 }
 
 .divider::before,
@@ -136,7 +132,6 @@ const formatDate = (dateString) => {
 
 .achievement-card.unlocked {
   border-color: #4caf50;
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
 }
 
 .achievement-card.locked {
@@ -159,7 +154,7 @@ const formatDate = (dateString) => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 3px solid #e94560;
+  border: 3px solid #ff4d4d;
 }
 
 .achievement-icon {
@@ -193,7 +188,7 @@ const formatDate = (dateString) => {
 
 .description {
   margin: 0;
-  color: #aaa;
+  color: #fff;
   font-size: 0.95rem;
   line-height: 1.4;
 }
@@ -209,7 +204,7 @@ const formatDate = (dateString) => {
 }
 
 .locked-badge {
-  color: #666;
+  color: #888;
   font-size: 0.85rem;
   font-style: italic;
 }
@@ -217,7 +212,7 @@ const formatDate = (dateString) => {
 .code {
   font-family: monospace;
   font-size: 0.75rem;
-  color: #555;
+  color: #888;
   margin-top: 4px;
 }
 </style>
