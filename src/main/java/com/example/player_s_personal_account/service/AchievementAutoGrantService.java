@@ -23,23 +23,43 @@ public class AchievementAutoGrantService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void checkAndGrant(Long userId, UserStatsResponse stats) {
-
+        UserEntity user = userRepo.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+        if (stats.getMatchesPlayed() >= 1) {
+            grantIfNotExists(userId, "FIRST_MATCH");
+        }
         if (stats.getWins() >= 1) {
             grantIfNotExists(userId, "FIRST_WIN");
         }
-
-        if (stats.getMatchesPlayed() >= 50) {
-            grantIfNotExists(userId, "VETERAN");
+        if (stats.getTotalKills() != null && stats.getTotalKills() >= 1) {
+            grantIfNotExists(userId, "FIRST_KILL");
         }
-
-        if (stats.getWins() >= 10 && stats.getLosses() == 0) {
-            grantIfNotExists(userId, "UNDEFEATED");
+        if (stats.getTotalDeaths() != null && stats.getTotalDeaths() >= 1) {
+            grantIfNotExists(userId, "FIRST_DEATH");
         }
-
-        UserEntity user = userRepo.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+        if (user.getLevel() >= 2) {
+            grantIfNotExists(userId, "LEVEL_2");
+        }
+        if (user.getLevel() >= 5) {
+            grantIfNotExists(userId, "LEVEL_5");
+        }
+        if (user.getRating() >= 1500) {
+            grantIfNotExists(userId, "RATING_1500");
+        }
         if (user.getRating() >= 2000) {
-            grantIfNotExists(userId, "LEGEND");
+            grantIfNotExists(userId, "RATING_2000");
+        }
+        if (stats.getTotalKills() != null && stats.getTotalKills() >= 5) {
+            grantIfNotExists(userId, "KILLS_5");
+        }
+        if (stats.getTotalKills() != null && stats.getTotalKills() >= 10) {
+            grantIfNotExists(userId, "KILLS_10");
+        }
+        if (stats.getMatchesPlayed() >= 5) {
+            grantIfNotExists(userId, "MATCHES_5");
+        }
+        if (stats.getMatchesPlayed() >= 50) {
+            grantIfNotExists(userId, "MATCHES_50");
         }
     }
 
