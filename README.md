@@ -15,3 +15,8 @@ https://github.com/user-attachments/assets/2d5c0ab1-0581-4a60-94b7-e0ac5f981842
 
 https://github.com/user-attachments/assets/29fb0b8e-06b8-4f0f-8385-5b289cf49292
 
+# Установка и запуск
+
+Для запуска приложения требуется установленный Docker с поддержкой Docker Compose. 
+
+Выполните команду docker compose up --build -d в корневой директории проекта — после инициализации базы данных бэкенд будет доступен на http://localhost:8084, фронтенд — на http://localhost:5173.
