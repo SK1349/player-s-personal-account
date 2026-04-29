@@ -6,12 +6,12 @@ export default defineConfig({
   server: {
     proxy: {
       '/achievements': {
-        target: 'http://localhost:8084',
+        target: 'http://backend:8084',
         changeOrigin: true,
         secure: false,
       },
       '/api': {
-        target: 'http://localhost:8084',
+        target: 'http://backend:8084',
         changeOrigin: true,
         secure: false,
       }

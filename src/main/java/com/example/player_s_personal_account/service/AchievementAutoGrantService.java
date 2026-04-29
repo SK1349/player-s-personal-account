@@ -21,7 +21,7 @@ public class AchievementAutoGrantService {
     private final AchievementRepository aRepo;
     private final UserRepository userRepo;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void checkAndGrant(Long userId, UserStatsResponse stats) {
         UserEntity user = userRepo.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
