@@ -11,5 +11,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/avatars/**")
                 .addResourceLocations("file:uploads/avatars/");
+        registry.addResourceHandler("/achievements/**")
+                .addResourceLocations("classpath:/static/achievements/");
     }
 }
